@@ -27,7 +27,7 @@ const styles = theme =>({
 class App extends Component{
 
   state = {
-    customers:"",
+    customers:[],
     completed: 0
   }
 
@@ -41,7 +41,9 @@ class App extends Component{
 
   callApi = async () => {
     const response = await fetch('/api/customers');
+    console.log("response: ",response);
     const body = await response.json();
+    console.log("body: ",body);
     return body;
   }
 
