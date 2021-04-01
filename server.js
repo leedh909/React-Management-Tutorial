@@ -20,7 +20,7 @@ app.get('/api/customers',(req,res)=>{
         if(err) console.log(err);
 
         var request = new mssql.Request();
-        request.query('select * from customer', function(err, result){
+        request.query('select * from customer where isDeleted=0', function(err, result){
             if(err) console.log(err);
             // console.log("result: ",result);
             res.send(result.recordset);
@@ -32,7 +32,7 @@ app.get('/api/customers',(req,res)=>{
 app.use('/image',express.static('./upload'));
 
 app.post('/api/customers', upload.single('image'), (req,res) =>{
-    let sql = "INSERT INTO CUSTOMER VALUES (@image, @name, @birthday, @gender, @job)";
+    let sql = "INSERT INTO CUSTOMER VALUES (@image, @name, @birthday, @gender, @job, GETDATE(), 0)";
     let image = '/image/' + req.file.filename;
     let name = req.body.name;
     let birthday = req.body.birthday;
@@ -63,6 +63,27 @@ app.post('/api/customers', upload.single('image'), (req,res) =>{
         })
     })
 })
+
+app.delete('/api/customers/:id',(req,res) =>{
+    let sql = 'UPDATE CUSTOMER SET isDeleted = 1 WHERE id = @id';
+    let id = [req.params.id];
+    mssql.connect(conf, function(err){
+        if(err) console.log(err);
+
+        var request = new mssql.Request();
+        request.input('id',mssql.Int, id);
+       
+        request.query(sql, function(err, result){
+            if(err) console.log(err);
+            // console.log("result: ",result);
+            res.send(result.recordset);
+            console.log(err);
+        })
+    })
+
+
+})
+
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
 
